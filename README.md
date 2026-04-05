@@ -65,47 +65,45 @@ Use these pre-seeded accounts to test role-based access:
 
 ```mermaid
 graph TD
-    Client((Client))
 
-    subgraph MW [Middleware]
-        RL[Rate Limiter]
-        CP[CORS and JSON Parser]
+    User((Root User / Team Member))
+
+    %% Presentation
+    subgraph PL [Presentation Layer]
+        L[Landing + Auth]
+        D[Dashboard Views]
+        C[Chatbot Widget]
     end
 
-    subgraph RT [Routing]
-        UR[Users]
-        RR[Records]
-        DR[Dashboard]
+    %% Backend
+    subgraph AL [Application Layer]
+        A[Auth + Role Access]
+        T[Data / Ticket Handling]
+        V[Voice / API Endpoints]
+        S[Semantic Chat Controller]
+        M[Memory APIs]
     end
 
-    subgraph AU [Auth]
-        JW[JWT Verify]
-        RG[Role Guard]
-        IV[Input Validator]
+    %% AI
+    subgraph AI [AI Layer]
+        G[LLM API]
+        E[Embedding Model]
     end
 
-    subgraph CT [Controllers]
-        UC[User Controller]
-        RC[Record Controller]
-        DC[Dashboard Controller]
-    end
-
+    %% Database
     subgraph DL [Data Layer]
-        UM[(User Model)]
-        RM[(Record Model)]
-        DB[(MongoDB)]
+        DB[(MySQL / MongoDB)]
     end
 
-    Client --> RL --> CP
-    CP --> UR & RR & DR
-    UR --> IV --> UC
-    RR --> JW
-    DR --> JW
-    JW --> RG
-    RG --> RC & DC
-    UC --> UM --> DB
-    RC --> RM --> DB
-    DC --> RM
+    %% Connections
+    User --> PL
+    PL --> AL
+    D --> S
+    C --> S
+    AL --> AI
+    S --> M
+    M --> DB
+    AI --> DB
 ```
 
 ## Project Structure

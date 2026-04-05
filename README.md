@@ -65,77 +65,48 @@ Use these pre-seeded accounts to test role-based access:
 
 ```mermaid
 graph TD
-    User((Client / Swagger UI))
+    User((Client))
 
-    subgraph Frontend [Presentation Layer]
-        SwaggerUI[Swagger UI - /api-docs]
-        HTTPClient[HTTP Client]
+    subgraph Middleware [Middleware]
+        RateLimit[Rate Limiter]
+        CORS[CORS + JSON Parser]
     end
 
-    subgraph Middleware [Middleware Layer - Express]
-        RateLimit[Rate Limiter - 100 req / 15 min]
-        CORS[CORS Handler]
-        JSONParser[JSON Parser]
+    subgraph Routing [Routing]
+        UserRoutes[/api/users]
+        RecordRoutes[/api/records]
+        DashRoutes[/api/dashboard]
     end
 
-    subgraph Routing [Routing Layer]
-        UserRoutes[User Routes - /api/users]
-        RecordRoutes[Record Routes - /api/records]
-        DashRoutes[Dashboard Routes - /api/dashboard]
+    subgraph Auth [Auth]
+        AuthMW[JWT Verify]
+        RoleMW[Role Guard]
+        ValidateMW[Input Validator]
     end
 
-    subgraph Auth [Auth Layer]
-        AuthMW[Auth Middleware - JWT Verify]
-        RoleMW[Role Middleware - authorizeRoles]
-        ValidateMW[Validate Middleware - express-validator]
+    subgraph Controllers [Controllers]
+        UserCtrl[User Controller]
+        RecordCtrl[Record Controller]
+        DashCtrl[Dashboard Controller]
     end
 
-    subgraph Controllers [Controller Layer]
-        UserCtrl[User Controller - register / login / list]
-        RecordCtrl[Record Controller - CRUD + filter + paginate]
-        DashCtrl[Dashboard Controller - income / expense / balance]
-    end
-
-    subgraph Data [Data Layer - Mongoose ODM]
+    subgraph Data [Data Layer]
         UserModel[(User Model)]
         RecordModel[(Record Model)]
+        MongoDB[(MongoDB)]
     end
 
-    MongoDB[(MongoDB)]
-
-    User --> SwaggerUI
-    User --> HTTPClient
-    SwaggerUI --> RateLimit
-    HTTPClient --> RateLimit
+    User --> RateLimit
     RateLimit --> CORS
-    CORS --> JSONParser
-    JSONParser --> UserRoutes
-    JSONParser --> RecordRoutes
-    JSONParser --> DashRoutes
-    UserRoutes --> ValidateMW
+    CORS --> UserRoutes & RecordRoutes & DashRoutes
+    UserRoutes --> ValidateMW --> UserCtrl
     RecordRoutes --> AuthMW
     DashRoutes --> AuthMW
-    ValidateMW --> UserCtrl
     AuthMW --> RoleMW
-    RoleMW --> RecordCtrl
-    RoleMW --> DashCtrl
-    UserCtrl --> UserModel
-    RecordCtrl --> RecordModel
-    DashCtrl --> RecordModel
-    UserModel --> MongoDB
-    RecordModel --> MongoDB
+    RoleMW --> RecordCtrl & DashCtrl
+    UserCtrl --> UserModel --> MongoDB
+    RecordCtrl & DashCtrl --> RecordModel --> MongoDB
 ```
-
-**Layer breakdown:**
-
-| Layer | Components | Responsibility |
-|---|---|---|
-| Middleware | Rate Limiter, CORS, JSON Parser | Request filtering, parsing, abuse protection |
-| Routing | userRoutes, recordRoutes, dashboardRoutes | Map URL paths to handlers |
-| Auth | authMiddleware, roleMiddleware | Verify JWT, enforce role permissions |
-| Validation | validateMiddleware (register only) | Sanitize and validate request body |
-| Controllers | userController, recordController, dashboardController | Business logic and response shaping |
-| Data Layer | User Model, Record Model, MongoDB | Persistence via Mongoose ODM |
 
 ## Project Structure
 
@@ -304,5 +275,3 @@ Bearer YOUR_TOKEN_HERE
 3. Click **Authorize**, then **Close**
 
 **Step 4 —** All subsequent requests will include your token automatically. Try switching between different role credentials to observe access differences.
-
----

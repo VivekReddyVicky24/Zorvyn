@@ -65,47 +65,47 @@ Use these pre-seeded accounts to test role-based access:
 
 ```mermaid
 graph TD
-    User((Client))
+    Client((Client))
 
-    subgraph Middleware [Middleware]
-        RateLimit[Rate Limiter]
-        CORS[CORS + JSON Parser]
+    subgraph MW [Middleware]
+        RL[Rate Limiter]
+        CP[CORS and JSON Parser]
     end
 
-    subgraph Routing [Routing]
-        UserRoutes[/api/users]
-        RecordRoutes[/api/records]
-        DashRoutes[/api/dashboard]
+    subgraph RT [Routing]
+        UR[Users]
+        RR[Records]
+        DR[Dashboard]
     end
 
-    subgraph Auth [Auth]
-        AuthMW[JWT Verify]
-        RoleMW[Role Guard]
-        ValidateMW[Input Validator]
+    subgraph AU [Auth]
+        JW[JWT Verify]
+        RG[Role Guard]
+        IV[Input Validator]
     end
 
-    subgraph Controllers [Controllers]
-        UserCtrl[User Controller]
-        RecordCtrl[Record Controller]
-        DashCtrl[Dashboard Controller]
+    subgraph CT [Controllers]
+        UC[User Controller]
+        RC[Record Controller]
+        DC[Dashboard Controller]
     end
 
-    subgraph Data [Data Layer]
-        UserModel[(User Model)]
-        RecordModel[(Record Model)]
-        MongoDB[(MongoDB)]
+    subgraph DL [Data Layer]
+        UM[(User Model)]
+        RM[(Record Model)]
+        DB[(MongoDB)]
     end
 
-    User --> RateLimit
-    RateLimit --> CORS
-    CORS --> UserRoutes & RecordRoutes & DashRoutes
-    UserRoutes --> ValidateMW --> UserCtrl
-    RecordRoutes --> AuthMW
-    DashRoutes --> AuthMW
-    AuthMW --> RoleMW
-    RoleMW --> RecordCtrl & DashCtrl
-    UserCtrl --> UserModel --> MongoDB
-    RecordCtrl & DashCtrl --> RecordModel --> MongoDB
+    Client --> RL --> CP
+    CP --> UR & RR & DR
+    UR --> IV --> UC
+    RR --> JW
+    DR --> JW
+    JW --> RG
+    RG --> RC & DC
+    UC --> UM --> DB
+    RC --> RM --> DB
+    DC --> RM
 ```
 
 ## Project Structure
